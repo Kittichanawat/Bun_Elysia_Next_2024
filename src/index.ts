@@ -52,11 +52,6 @@ const app = new Elysia()
 
   return `params: ${id} body: ${name} ${age}`;
 })
-.delete('/customers/delete/:id', ({params}: {params:any}) => {
-  const id = params.id;
-
-  return `params: ${id}`;
-})
 
 
 .listen(3000);
