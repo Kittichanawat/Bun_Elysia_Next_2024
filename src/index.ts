@@ -1,8 +1,42 @@
-import { Elysia, error } from "elysia";
-
+import { Elysia } from "elysia";
+import { swagger } from '@elysiajs/swagger';
+import { cors } from '@elysiajs/cors';
+import {staticPlugin} from "@elysiajs/static";
+import {jwt} from "@elysiajs/jwt";
+import CustomerController from "./controllers/CustomerController";
 const app = new Elysia()
+.use(swagger())
+.use(cors())
+.use(staticPlugin())
+.use(jwt({
+  name:'jwt',
+  secret:'secret'
+}))
+.get('/customers',CustomerController.list)
+.post('/customers', CustomerController.create)
+.put('/customers/:id', CustomerController.update)
+.delete('/customers/:id', CustomerController.remove)
+.post('/login', async ({jwt, cookie: {auth}}) =>{
+  const user = {
+    id: 1,
+    username: 'admin',    
+    level: 'admin',
+    path:'/profile'
+  }
+
+  const token = await jwt.sign(user)
+
+  auth.set({
+    value: token,
+    httpOnly: true,
+    secure: true,
+    maxAge: 60 * 60 * 24 * 7 // 1 week
+  })
+  return {token:token}
+})
 .get("/", () => "Hello Elysia")
 .get("/hello", () => "Hello World")
+.get("/hello", () => "Hello Next")
 .get("/hello/:name", ({ params }) => `Hello ${params.name}`)
 .get("/hello/:name/:age", ({ params }) => `Hello ${params.name} ${params.age}`)
 .get("/customers/:id", ({params}) => {
@@ -17,6 +51,14 @@ const app = new Elysia()
       return {error: "Customer not found"}
     }
   return customer
+})
+.get('profile', ({jwt, cookie: {auth}}) => {
+  const user = jwt.verify(auth.value);
+  return user
+})
+.get('/logout', ({cookie: {auth}}) => {
+  auth.remove()
+  return {message: 'Logged out'}
 })
 .get('/customers/query', ({query}) => {
   const name = query.name
@@ -52,9 +94,25 @@ const app = new Elysia()
 
   return `params: ${id} body: ${name} ${age}`;
 })
+.delete('/customers/delete/:id', ({params}: {params:any}) => {
+  const id = params.id;
 
-
-.listen(3000);
+  return `params: ${id}`;
+})
+.post('/upload-file', ({body}: {body:{file:File}}) => {
+  const file = body.file;
+  Bun.write('uploads/' + file.name, file)
+  return {message: 'File uploaded'}
+})
+.get('/write-file', () => {
+  Bun.write('text.txt', 'Hello World')
+  return {message: 'File written'}
+})
+.get('/read-file', () => {
+  const file = Bun.file('text.txt')
+  return  file.text()
+})
+.listen(3003);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
