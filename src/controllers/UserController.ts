@@ -69,5 +69,97 @@ export const UserController = {
         } catch (error) {
             return error
         }
+    },
+
+    sort: async () => {
+        try {
+            return await prisma.user.findMany({
+                orderBy:{
+                    credit: 'desc'
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
+    filter: async () => {
+        try {
+            return await prisma.user.findMany({
+                where: {
+                    level:"admin"
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    }, 
+    moreThan: async () =>{
+        try {
+            return await prisma.user.findMany({
+                where: {
+                    credit: {
+                        gt: 100
+                    }
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
+    lessThan: async () => {
+        try {
+            return await prisma.user.findMany({
+                where: {
+                    credit: {
+                        lt: 100
+                    }
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
+    notEqual: async () => {
+        return await prisma.user.findMany({
+            where: {
+                credit: {
+                    not: 100
+                }
+            }
+        })
+    },
+
+    in: async () => {
+        return await prisma.user.findMany({
+            where:{credit: {in: [100, 200]}}
+        })
+    },
+    isNull: async () => {
+        return await prisma.user.findMany({
+            where: {
+                credit:{
+                    equals: null
+                }
+            }
+        })
+    },
+    isNotNull: async () => {
+        return await prisma.user.findMany({
+            where: {
+                credit:{
+                    not: null
+                }
+            }
+        })
+    },
+    between: async () => {
+        return await prisma.user.findMany({
+            where: {
+                credit: {
+                    gte: 100,
+                    lte: 200
+                }
+            }
+        })
     }
 }
