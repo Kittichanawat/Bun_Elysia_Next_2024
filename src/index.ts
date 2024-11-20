@@ -6,12 +6,15 @@ import { staticPlugin } from "@elysiajs/static";
 import { jwt } from "@elysiajs/jwt";
 import CustomerController from "./controllers/CustomerController";
 import { UserController } from "./controllers/UserController";
+import {DepartmentController} from "./controllers/DepartmentController";
 const app = new Elysia()
   .use(swagger({
     documentation: {
       tags: [
         { name: 'User', description: 'User related endpoints' },
+        { name: 'Department', description: 'Department related endpoints'},
         { name: 'Customer', description: 'Customer related endpoints' }
+       
       ]
     }
   }))
@@ -21,6 +24,13 @@ const app = new Elysia()
     name: 'jwt',
     secret: 'secret'
   }))
+
+  .group('/departments', app => app
+    .get('/', DepartmentController.list, {tags: ['Department']})
+    .get('/usersInDepartment/:id', DepartmentController.usersInDepartment, {tags: ['Department']})
+    .post('/create-department-and-users', DepartmentController.createDepartmentAndUsers, {tags: ['Department']})
+    .get('/count-users-in-department', DepartmentController.countUsersInDepartment, {tags: ['Department']})
+  )
   .group('/users', app => app
     .get('/', UserController.list, { tags: ['User'] })
     .post('/', UserController.create, { tags: ['User'] })
@@ -36,6 +46,13 @@ const app = new Elysia()
     .get('/isNull', UserController.isNull, {tags: ['User']})
     .get('/isNotNull', UserController.isNotNull, {tags: ['User']})
     .get('/between', UserController.between, {tags: ['User']})
+    .get('/count', UserController.count, {tags: ['User']})
+    .get('/sum', UserController.sum,{tags:['User']})
+    .get('/max',UserController.max,{tags: ['User']})
+    .get('/min',UserController.min,{tags: ['User']})
+    .get('/avg',UserController.avg,{tags: ['User']})
+    .get('/users-and-departments', UserController.userAndDepartment, {tags: ['User']})
+    .post('/sign-in', UserController.signIn, {tags:['User']})
 
   )
   .get('/customers', CustomerController.list, { tags: ['Customer'] })

@@ -161,5 +161,83 @@ export const UserController = {
                 }
             }
         })
+    },
+    count: async () => {
+        try {
+            const totalRow = await prisma.user.count()
+            return totalRow
+        } catch (error) {
+            return error
+        }
+    },
+    sum: async () => {
+        try {
+            const result = await prisma.user.aggregate({
+                _sum:{
+                    credit: true
+                }
+            })
+            return {sum: result._sum.credit}
+        } catch (error) {
+            return error 
+        }
+    },
+    max: async () => {
+        try {
+            const results = await prisma.user.aggregate({
+                _max: {
+                    credit: true
+                }
+            })
+            return {max: results._max.credit}
+        } catch (error) {
+            return error
+        }
+    },
+    avg: async () => {
+        return await prisma.user.aggregate({
+            _avg: {
+                credit: true
+            }
+        })
+    },
+    min: async () => {
+        return await prisma.user.aggregate({
+            _min: {
+                credit: true
+            }
+        })
+    },
+    userAndDepartment: async () => {
+        try {
+            const users = await prisma.user.findMany({
+                include:{
+                    department: true
+                }
+            })
+            return {user: users}
+        } catch (error) {
+            return error
+        }
+    },
+
+    signIn: async ({body}: {
+        body: {
+            email: string
+            password: string
+        }
+    })=> {
+        try {
+            const user = await prisma.user.findFirst({
+                where:{
+                    email: body.email,
+                    password: body.password
+                }
+            })
+            return {user:user}
+        } catch (error) {
+            return error
+        }
     }
+    
 }
